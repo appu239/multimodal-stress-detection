@@ -1,0 +1,14 @@
+flask
+flask-cors
+pymongo
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+requests
+PyJWT
+numpy
+librosa
+joblib
+openai-whisper
+bcrypt
+scikit-learn
