@@ -49,10 +49,6 @@ SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl") # New path
 # ==============================
 # LOAD MODELS
 # ==============================
-audio_model = joblib.load(AUDIO_MODEL_PATH)
-text_model = joblib.load(TEXT_MODEL_PATH)
-vectorizer = joblib.load(VECTORIZER_PATH)
-scaler = joblib.load(SCALER_PATH) # Load scaler
 
 # ==============================
 # STRESS LABELS
@@ -168,6 +164,8 @@ def speech_to_text(file_path, language=None):
 @app.route("/predict", methods=["POST"])
 @token_required
 def predict_audio(current_user_email):
+    audio_model = joblib.load(AUDIO_MODEL_PATH)
+    scaler = joblib.load(SCALER_PATH)
     if "audio" not in request.files:
         return jsonify({"error": "No audio file"}), 400
 
@@ -258,6 +256,8 @@ def predict_audio(current_user_email):
 @app.route("/predict-text", methods=["POST"])
 @token_required
 def predict_text(current_user_email):
+    text_model = joblib.load(TEXT_MODEL_PATH)
+    vectorizer = joblib.load(VECTORIZER_PATH)
     data = request.get_json(force=True)
     text = data.get("text", "").strip()
 
@@ -708,6 +708,9 @@ from flask import send_from_directory
 @app.route("/")
 def serve():
     return send_from_directory(app.static_folder, "index.html")
+    import os
+
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
