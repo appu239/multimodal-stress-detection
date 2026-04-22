@@ -24,8 +24,7 @@ import bcrypt
 # ==============================
 # OPTIONAL WHISPER (Speech → Text)
 # ==============================
-       
-      WHISPER_AVAILABLE = False
+WHISPER_AVAILABLE = False
 # ==============================
 # FLASK APP
 # ==============================
