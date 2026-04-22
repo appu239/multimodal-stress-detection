@@ -24,12 +24,8 @@ import bcrypt
 # ==============================
 # OPTIONAL WHISPER (Speech → Text)
 # ==============================
-try:
-    import whisper
-    WHISPER_AVAILABLE = True
-except:
-    WHISPER_AVAILABLE = False
-
+       
+      WHISPER_AVAILABLE = False
 # ==============================
 # FLASK APP
 # ==============================
@@ -62,15 +58,7 @@ stress_labels = {
 # ==============================
 # LOAD WHISPER
 # ==============================
-if WHISPER_AVAILABLE:
-    try:
-        whisper_model = whisper.load_model("tiny")
-        print("OK: Whisper model loaded successfully")
-    except Exception as e:
-        print(f"FAIL: Whisper load failed: {e}")
-        WHISPER_AVAILABLE = False
-else:
-    print("WARNING: Whisper is NOT installed (openai-whisper)")
+
 
 from functools import wraps
 
