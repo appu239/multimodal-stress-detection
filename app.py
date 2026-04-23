@@ -10,7 +10,8 @@ client = MongoClient("mongodb+srv://aparnac239_db_user:woOIf19R5CeXGlnm@cluster0
 db = client["stressai"]
 contact_collection = db["contacts"]
 users_collection = db["users"]
-
+assessments_collection = db["assessments"]
+audit_logs_collection = db["audit_logs"]
 SECRET_KEY = "super_secret_key_123"
 GOOGLE_CLIENT_ID = "575049109828-0ggp1vbn64ojk93vp71e2dp59634s3nv.apps.googleusercontent.com"
 import librosa
@@ -24,12 +25,17 @@ import bcrypt
 # ==============================
 # OPTIONAL WHISPER (Speech → Text)
 # ==============================
-WHISPER_AVAILABLE = False
+try:
+    import whisper
+    WHISPER_AVAILABLE = True
+except:
+    WHISPER_AVAILABLE = False
+
 # ==============================
 # FLASK APP
 # ==============================
 app = Flask(__name__, static_folder="build", static_url_path="/")
-CORS(app, origins=["http://localhost:3000","http://127.0.0.1:3000"])
+CORS(app)
 
 # ==============================
 # PATHS
@@ -44,6 +50,10 @@ SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl") # New path
 # ==============================
 # LOAD MODELS
 # ==============================
+audio_model = joblib.load(AUDIO_MODEL_PATH)
+text_model = joblib.load(TEXT_MODEL_PATH)
+vectorizer = joblib.load(VECTORIZER_PATH)
+scaler = joblib.load(SCALER_PATH) # Load scaler
 
 # ==============================
 # STRESS LABELS
@@ -57,7 +67,15 @@ stress_labels = {
 # ==============================
 # LOAD WHISPER
 # ==============================
-
+if WHISPER_AVAILABLE:
+    try:
+        whisper_model = whisper.load_model("tiny")
+        print("OK: Whisper model loaded successfully")
+    except Exception as e:
+        print(f"FAIL: Whisper load failed: {e}")
+        WHISPER_AVAILABLE = False
+else:
+    print("WARNING: Whisper is NOT installed (openai-whisper)")
 
 from functools import wraps
 
@@ -151,8 +169,6 @@ def speech_to_text(file_path, language=None):
 @app.route("/predict", methods=["POST"])
 @token_required
 def predict_audio(current_user_email):
-    audio_model = joblib.load(AUDIO_MODEL_PATH)
-    scaler = joblib.load(SCALER_PATH)
     if "audio" not in request.files:
         return jsonify({"error": "No audio file"}), 400
 
@@ -243,8 +259,6 @@ def predict_audio(current_user_email):
 @app.route("/predict-text", methods=["POST"])
 @token_required
 def predict_text(current_user_email):
-    text_model = joblib.load(TEXT_MODEL_PATH)
-    vectorizer = joblib.load(VECTORIZER_PATH)
     data = request.get_json(force=True)
     text = data.get("text", "").strip()
 
@@ -311,7 +325,7 @@ def contact():
 # GOOGLE LOGIN (PRODUCTION LEVEL)
 # ==============================
 
-GOOGLE_CLIENT_ID = "575049109828-0ggp1vbn64ojk93vp71e2dp59634s3nv.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "169712227099-7hhldb8jn4ji850assgbjna400i34iqv.apps.googleusercontent.com"
 
 users_collection = db["users"]
 
@@ -510,9 +524,6 @@ def delete_history_item(current_user_email, id):
 # ADMIN ENDPOINTS
 # ==============================
 
-assessments_collection = db["assessments"]
-audit_logs_collection = db["audit_logs"]
-
 @app.route("/api/users", methods=["GET"])
 def get_users():
     try:
@@ -695,9 +706,6 @@ from flask import send_from_directory
 @app.route("/")
 def serve():
     return send_from_directory(app.static_folder, "index.html")
-    import os
-
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000)
 
