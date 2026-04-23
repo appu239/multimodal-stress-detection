@@ -1,0 +1,65 @@
+# ==============================
+# PYTHON
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv
+venv/
+env/
+
+# ==============================
+# TEMP AUDIO UPLOADS (backend)
+# ==============================
+backend/*.wav
+backend/*.webm
+backend/*.mp3
+backend/*.tmp
+backend/*.input
+
+# ==============================
+# TRAINING DATASETS (too large for git)
+# ==============================
+Stress_Datasets/
+
+# ==============================
+# DUPLICATE / UNUSED MODELS
+# ==============================
+backend/best_stress_model.pkl
+
+# ==============================
+# NODE / REACT
+# ==============================
+node_modules/
+frontend/node_modules/
+stress-frontend/node_modules/
+backend/node_modules/
+frontend/build/
+stress-frontend/build/
+.npm
+npm-debug.log*
+
+# ==============================
+# IDE & OS
+# ==============================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.DS_Store
+Thumbs.db
+
+# ==============================
+# LOGS
+# ==============================
+*.log
+logs/

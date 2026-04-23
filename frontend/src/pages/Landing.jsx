@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PublicFooter from "../components/PublicFooter";
 import { motion } from "framer-motion";
+import { getApiUrl } from "../utils/api";
 
 const Landing = () => {
   const navigate = useNavigate();
   const [userCount, setUserCount] = useState(50);
   useEffect(() => {
-    fetch("http://localhost:5000/api/user-count")
+    fetch(getApiUrl("/api/user-count"))
       .then((res) => res.json())
       .then((data) => {
         if (data.count !== undefined) {

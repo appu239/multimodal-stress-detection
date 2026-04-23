@@ -10,7 +10,8 @@ client = MongoClient("mongodb+srv://aparnac239_db_user:woOIf19R5CeXGlnm@cluster0
 db = client["stressai"]
 contact_collection = db["contacts"]
 users_collection = db["users"]
-
+assessments_collection = db["assessments"]
+audit_logs_collection = db["audit_logs"]
 SECRET_KEY = "super_secret_key_123"
 GOOGLE_CLIENT_ID = "575049109828-0ggp1vbn64ojk93vp71e2dp59634s3nv.apps.googleusercontent.com"
 import librosa
@@ -34,7 +35,7 @@ except:
 # FLASK APP
 # ==============================
 app = Flask(__name__, static_folder="build", static_url_path="/")
-CORS(app, origins=["http://localhost:3000","http://127.0.0.1:3000"])
+CORS(app)
 
 # ==============================
 # PATHS
@@ -42,17 +43,24 @@ CORS(app, origins=["http://localhost:3000","http://127.0.0.1:3000"])
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 AUDIO_MODEL_PATH = os.path.join(BASE_DIR, "stress_model.pkl")
-TEXT_MODEL_PATH = os.path.join(BASE_DIR, "text_model.pkl") # Fixed path
+TEXT_MODEL_PATH = os.path.join(BASE_DIR, "text_model.pkl")
 VECTORIZER_PATH = os.path.join(BASE_DIR, "vectorizer.pkl")
-SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl") # New path
+SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl")
 
 # ==============================
 # LOAD MODELS
 # ==============================
-audio_model = joblib.load(AUDIO_MODEL_PATH)
-text_model = joblib.load(TEXT_MODEL_PATH)
-vectorizer = joblib.load(VECTORIZER_PATH)
-scaler = joblib.load(SCALER_PATH) # Load scaler
+try:
+    audio_model = joblib.load(AUDIO_MODEL_PATH)
+    text_model = joblib.load(TEXT_MODEL_PATH)
+    vectorizer = joblib.load(VECTORIZER_PATH)
+    scaler = joblib.load(SCALER_PATH)
+    MODELS_AVAILABLE = True
+    print("OK: All ML models loaded successfully")
+except Exception as e:
+    audio_model = text_model = vectorizer = scaler = None
+    MODELS_AVAILABLE = False
+    print(f"WARNING: ML models not loaded: {e}")
 
 # ==============================
 # STRESS LABELS
@@ -168,6 +176,8 @@ def speech_to_text(file_path, language=None):
 @app.route("/predict", methods=["POST"])
 @token_required
 def predict_audio(current_user_email):
+    if not MODELS_AVAILABLE:
+        return jsonify({"error": "ML models are not loaded on this server."}), 503
     if "audio" not in request.files:
         return jsonify({"error": "No audio file"}), 400
 
@@ -258,6 +268,8 @@ def predict_audio(current_user_email):
 @app.route("/predict-text", methods=["POST"])
 @token_required
 def predict_text(current_user_email):
+    if not MODELS_AVAILABLE:
+        return jsonify({"error": "ML models are not loaded on this server."}), 503
     data = request.get_json(force=True)
     text = data.get("text", "").strip()
 
@@ -324,7 +336,7 @@ def contact():
 # GOOGLE LOGIN (PRODUCTION LEVEL)
 # ==============================
 
-GOOGLE_CLIENT_ID = "575049109828-0ggp1vbn64ojk93vp71e2dp59634s3nv.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "169712227099-7hhldb8jn4ji850assgbjna400i34iqv.apps.googleusercontent.com"
 
 users_collection = db["users"]
 
@@ -523,9 +535,6 @@ def delete_history_item(current_user_email, id):
 # ADMIN ENDPOINTS
 # ==============================
 
-assessments_collection = db["assessments"]
-audit_logs_collection = db["audit_logs"]
-
 @app.route("/api/users", methods=["GET"])
 def get_users():
     try:
@@ -709,5 +718,5 @@ from flask import send_from_directory
 def serve():
     return send_from_directory(app.static_folder, "index.html")
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
 

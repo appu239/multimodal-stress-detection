@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { downloadCSV } from "../utils/exportUtils";
+import { getApiUrl } from "../utils/api";
 
 export default function AdminAuditLogs() {
   const [logs, setLogs] = useState([]);
@@ -9,7 +10,7 @@ export default function AdminAuditLogs() {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/audit-logs")
+    fetch(getApiUrl("/api/audit-logs"))
       .then(res => res.json())
       .then(data => {
         setLogs(data);

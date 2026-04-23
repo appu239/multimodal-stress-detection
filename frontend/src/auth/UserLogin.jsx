@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import PublicFooter from "../components/PublicFooter";
+import { getApiUrl } from "../utils/api";
 
 function UserLogin() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ function UserLogin() {
     const password = e.target.password.value;
 
     try {
-      const res = await fetch("http://localhost:5000/api/login", {
+      const res = await fetch(getApiUrl("/api/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

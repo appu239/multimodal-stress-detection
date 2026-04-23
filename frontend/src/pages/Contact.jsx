@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { getApiUrl } from "../utils/api";
 
 const Contact = () => {
 
@@ -20,7 +21,7 @@ const Contact = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/api/contact", form);
+      await axios.post(getApiUrl("/api/contact"), form);
       alert("Message sent successfully!");
       setForm({ name: "", email: "", message: "" });
     } catch (error) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { downloadCSV } from "../utils/exportUtils";
+import { getApiUrl } from "../utils/api";
 
 export default function AdminAnalytics() {
   const [analytics, setAnalytics] = useState({
@@ -11,7 +12,7 @@ export default function AdminAnalytics() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/analytics")
+    fetch(getApiUrl("/api/analytics"))
       .then((res) => res.json())
       .then((data) => setAnalytics(data))
       .catch((err) => console.error("Failed to fetch analytics:", err));

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PublicFooter from "../components/PublicFooter";
+import { getApiUrl } from "../utils/api";
 
 export default function ForgotPassword() {
     const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function ForgotPassword() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch("http://localhost:5000/api/forgot-password", {
+            const res = await fetch(getApiUrl("/api/forgot-password"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { downloadCSV } from "../utils/exportUtils";
+import { getApiUrl } from "../utils/api";
 
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState({
@@ -14,13 +15,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     // Fetch Analytics
-    fetch("http://localhost:5000/api/analytics")
+    fetch(getApiUrl("/api/analytics"))
       .then(res => res.json())
       .then(data => setAnalytics(data))
       .catch(err => console.error("Failed to fetch analytics:", err));
 
     // Fetch Recent Logs
-    fetch("http://localhost:5000/api/audit-logs")
+    fetch(getApiUrl("/api/audit-logs"))
       .then(res => res.json())
       .then(data => setLogs(data))
       .catch(err => console.error("Failed to fetch logs:", err));

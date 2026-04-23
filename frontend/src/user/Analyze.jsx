@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { getUserInfo, getAuthToken } from "../utils/auth";
+import { getApiUrl } from "../utils/api";
 
 export default function Analyze() {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ export default function Analyze() {
         formData.append("audio", blob, "recording.wav");
         formData.append("language", selectedLanguage);
 
-        res = await fetch("http://localhost:5000/predict", {
+        res = await fetch(getApiUrl("/predict"), {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${getAuthToken()}`
@@ -130,7 +131,7 @@ export default function Analyze() {
           body: formData,
         });
       } else if (text && text.trim()) {
-        res = await fetch("http://localhost:5000/predict-text", {
+        res = await fetch(getApiUrl("/predict-text"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -233,7 +234,7 @@ export default function Analyze() {
       <section className="space-y-4">
         <h3 className="font-bold text-2xl text-slate-900 dark:text-white">New Analysis</h3>
 
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
           {/* Audio Analysis */}
           <div className="bg-white dark:bg-[#1b2531] rounded-xl p-8 border border-slate-100 dark:border-slate-800 space-y-6 transition-colors flex flex-col h-full">
@@ -315,8 +316,8 @@ export default function Analyze() {
       <section className="space-y-4">
         <h3 className="font-bold text-2xl text-slate-900 dark:text-white">Latest Analysis Results</h3>
 
-        <div className="grid grid-cols-3 gap-8">
-          <div className="col-span-2 bg-white dark:bg-[#1b2531] rounded-xl p-8 border border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-8 transition-colors">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-white dark:bg-[#1b2531] rounded-xl p-8 border border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-8 transition-colors">
             <div className="text-center">
               <p className="text-sm font-bold tracking-[0.15em] text-slate-900 dark:text-slate-400 mb-4 opacity-80">
                 LIVE STRESS SCORE
@@ -354,7 +355,7 @@ export default function Analyze() {
               </div>
             </div>
 
-            <div className="col-span-2 space-y-4">
+            <div className="md:col-span-2 space-y-4">
               <p className="text-sm font-bold tracking-[0.15em] text-slate-900 dark:text-slate-400 opacity-80">
                 TRANSCRIPTION
               </p>

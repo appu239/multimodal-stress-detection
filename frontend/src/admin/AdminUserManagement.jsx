@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { downloadCSV } from "../utils/exportUtils";
+import { getApiUrl } from "../utils/api";
 
 export default function AdminUserManagement() {
   const [statusOpen, setStatusOpen] = useState(false);
@@ -14,7 +15,7 @@ export default function AdminUserManagement() {
   }, []);
 
   const fetchUsers = () => {
-    fetch("http://localhost:5000/api/users")
+    fetch(getApiUrl("/api/users"))
       .then(res => res.json())
       .then(data => {
         const mappedUsers = data.map((u, index) => ({
@@ -36,7 +37,7 @@ export default function AdminUserManagement() {
     if (!window.confirm(`Are you sure you want to delete ${email}?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${email}`, {
+      const res = await fetch(getApiUrl(`/api/users/${email}`), {
         method: "DELETE",
       });
 
@@ -57,7 +58,7 @@ export default function AdminUserManagement() {
     setUsers(users.map(u => u.email === user.email ? { ...u, status: newStatus } : u));
 
     try {
-      await fetch(`http://localhost:5000/api/users/${user.email}`, {
+      await fetch(getApiUrl(`/api/users/${user.email}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })

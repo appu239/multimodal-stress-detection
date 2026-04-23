@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PublicFooter from "../components/PublicFooter";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
+import { getApiUrl } from "../utils/api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Register = () => {
     setPasswordError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/register", {
+      const response = await fetch(getApiUrl("/api/register"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -90,7 +91,7 @@ const Register = () => {
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   try {
-                    const response = await fetch("http://localhost:5000/api/google-login", {
+                    const response = await fetch(getApiUrl("/api/google-login"), {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",

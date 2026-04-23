@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getAuthToken } from "../utils/auth";
 import { downloadCSV } from "../utils/exportUtils";
+import { getApiUrl } from "../utils/api";
 
 export default function History() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function History() {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/history", {
+      const res = await axios.get(getApiUrl("/api/history"), {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       setHistory(res.data);
@@ -35,7 +36,7 @@ export default function History() {
   const deleteItem = async (id) => {
     if (!window.confirm("Are you sure you want to delete this analysis?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/history/${id}`, {
+      await axios.delete(getApiUrl(`/api/history/${id}`), {
         headers: { Authorization: `Bearer ${getAuthToken()}` }
       });
       setHistory(history.filter(item => item._id !== id));

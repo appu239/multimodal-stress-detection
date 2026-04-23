@@ -1,5 +1,6 @@
 flask
 flask-cors
+gunicorn
 pymongo
 google-auth
 google-auth-oauthlib
@@ -9,6 +10,6 @@ PyJWT
 numpy
 librosa
 joblib
-openai-whisper
 bcrypt
 scikit-learn
+soundfile

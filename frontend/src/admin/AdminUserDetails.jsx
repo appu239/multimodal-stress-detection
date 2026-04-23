@@ -1,5 +1,6 @@
 import { NavLink, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getApiUrl } from "../utils/api";
 
 export default function AdminUserDetails() {
   const { userId } = useParams(); // This is the email
@@ -8,7 +9,7 @@ export default function AdminUserDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/users/${userId}`)
+    fetch(getApiUrl(`/api/users/${userId}`))
       .then(res => {
         if (!res.ok) throw new Error("User not found");
         return res.json();
@@ -32,7 +33,7 @@ export default function AdminUserDetails() {
   const handleBlock = async () => {
     const newStatus = "Blocked";
     try {
-      await fetch(`http://localhost:5000/api/users/${userId}`, {
+      await fetch(getApiUrl(`/api/users/${userId}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
