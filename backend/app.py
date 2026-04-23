@@ -14,7 +14,6 @@ assessments_collection = db["assessments"]
 audit_logs_collection = db["audit_logs"]
 SECRET_KEY = "super_secret_key_123"
 GOOGLE_CLIENT_ID = "575049109828-0ggp1vbn64ojk93vp71e2dp59634s3nv.apps.googleusercontent.com"
-import librosa
 import numpy as np
 import joblib
 import os
@@ -24,12 +23,9 @@ import bcrypt
 
 # ==============================
 # OPTIONAL WHISPER (Speech → Text)
+# NOTE: Whisper is NOT imported at startup to save memory on Render free tier
 # ==============================
-try:
-    import whisper
-    WHISPER_AVAILABLE = True
-except:
-    WHISPER_AVAILABLE = False
+WHISPER_AVAILABLE = False
 
 # ==============================
 # FLASK APP
@@ -48,19 +44,37 @@ VECTORIZER_PATH = os.path.join(BASE_DIR, "vectorizer.pkl")
 SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl")
 
 # ==============================
-# LOAD MODELS
+# LOAD MODELS (lightweight text model only at startup)
+# Audio model + librosa loaded lazily on first request to save startup RAM
 # ==============================
 try:
-    audio_model = joblib.load(AUDIO_MODEL_PATH)
     text_model = joblib.load(TEXT_MODEL_PATH)
     vectorizer = joblib.load(VECTORIZER_PATH)
-    scaler = joblib.load(SCALER_PATH)
-    MODELS_AVAILABLE = True
-    print("OK: All ML models loaded successfully")
+    TEXT_MODELS_AVAILABLE = True
+    print("OK: Text models loaded successfully")
 except Exception as e:
-    audio_model = text_model = vectorizer = scaler = None
-    MODELS_AVAILABLE = False
-    print(f"WARNING: ML models not loaded: {e}")
+    text_model = vectorizer = None
+    TEXT_MODELS_AVAILABLE = False
+    print(f"WARNING: Text models not loaded: {e}")
+
+# Audio model loaded lazily (below) — saves ~150MB of startup RAM
+_audio_model = None
+_scaler = None
+
+def get_audio_models():
+    """Lazily load audio model and scaler on first use."""
+    global _audio_model, _scaler
+    if _audio_model is None:
+        try:
+            _audio_model = joblib.load(AUDIO_MODEL_PATH)
+            _scaler = joblib.load(SCALER_PATH)
+            print("OK: Audio models loaded lazily")
+        except Exception as e:
+            print(f"WARNING: Audio models could not be loaded: {e}")
+    return _audio_model, _scaler
+
+# Keep MODELS_AVAILABLE for backward compat
+MODELS_AVAILABLE = TEXT_MODELS_AVAILABLE
 
 # ==============================
 # STRESS LABELS
@@ -119,6 +133,7 @@ def token_required(f):
 # ==============================
 def extract_audio_features(file_path):
     try:
+        import librosa  # Lazy import — keeps startup RAM low on Render free tier
         audio, sr = librosa.load(file_path, sr=16000, mono=True)
         duration = librosa.get_duration(y=audio, sr=sr)
         
@@ -217,6 +232,12 @@ def predict_audio(current_user_email):
             return jsonify({"error": "Converted audio is empty"}), 500
 
         features = extract_audio_features(temp_wav)
+
+        # Lazy-load audio model + scaler on first request
+        audio_model, scaler = get_audio_models()
+        if audio_model is None or scaler is None:
+            return jsonify({"error": "Audio model not available"}), 503
+
         features_scaled = scaler.transform(features)
         
         # Prediction and Confidence
